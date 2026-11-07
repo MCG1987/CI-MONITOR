@@ -1,0 +1,13 @@
+# Docker Compose crea dos contenedores en una misma red interna.
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"             # Página visible en http://localhost:8080
+    depends_on:
+      - backend              # Inicia primero el servicio backend.
+
+  backend:
+    build: ./backend
+    expose:
+      - "3000"               # Puerto interno: NO se publica al equipo.
