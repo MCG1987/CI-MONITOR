@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CI-Monitor | Semana 3</title>
+  <style>
+    /* Estilos sencillos, sin librerías externas. */
+    body { font-family: Arial, sans-serif; background: #f2f5f9; margin: 0; padding: 35px 15px; color: #1d2939; }
+    main { max-width: 560px; margin: 45px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 3px 14px #00000013; }
+    h1 { margin: 0 0 8px; }
+    p { line-height: 1.5; }
+    .muted { color: #667085; }
+    #resultado { margin-top: 20px; padding: 15px; background: #f4f6f8; border-radius: 8px; }
+    button { background: #1768b3; border: 0; color: #fff; padding: 12px 18px; border-radius: 7px; cursor: pointer; }
+    button:hover { background: #12558f; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .ok { color: #137a3b; }
+    .error { color: #b42318; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>CI-Monitor</h1>
+    <p class="muted">Proyecto de Integración Continua — Entrega semana 3</p>
+    <p>Esta página está en un contenedor Docker y consulta una API ubicada en otro contenedor.</p>
+    <button id="verificar" type="button">Verificar conexión</button>
+    <div id="resultado" role="status" aria-live="polite">Presiona el botón para consultar la API.</div>
+  </main>
+
+  <script>
+    // El navegador se comunica con Nginx. Nginx reenvía /api/ al contenedor backend.
+    const boton = document.getElementById('verificar');
+    const resultado = document.getElementById('resultado');
+
+    boton.addEventListener('click', async () => {
+      boton.disabled = true;
+      resultado.textContent = 'Consultando el servidor...';
+      resultado.className = '';
+
+      try {
+        // Usar una ruta relativa evita configurar direcciones IP entre contenedores.
+        const respuesta = await fetch('/api/estado', { cache: 'no-store' });
+        if (!respuesta.ok) throw new Error('HTTP ' + respuesta.status);
+        const datos = await respuesta.json();
+        resultado.textContent = datos.mensaje;
+        resultado.className = 'ok';
+      } catch (error) {
+        resultado.textContent = 'No fue posible comunicarse con la API: ' + error.message;
+        resultado.className = 'error';
+      } finally {
+        boton.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
